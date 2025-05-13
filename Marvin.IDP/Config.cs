@@ -8,6 +8,7 @@ public static class Config
     public static IEnumerable<IdentityResource> IdentityResources =>
         new IdentityResource[]
         { 
+            new IdentityResource("roles", "Your role(s)", new[] {"role"}),
             new IdentityResources.OpenId(),
             new IdentityResources.Profile()
         };
@@ -36,6 +37,7 @@ public static class Config
                     {
                         IdentityServerConstants.StandardScopes.OpenId,
                         IdentityServerConstants.StandardScopes.Profile,
+                        "roles"
                     },
                     ClientSecrets =
                     {
