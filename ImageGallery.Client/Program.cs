@@ -14,6 +14,8 @@ services.AddControllersWithViews()
 
 JsonWebTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
+services.AddAccessTokenManagement(); // allows to pass the access token for each api request
+
 // create an HttpClient used for accessing the API
 services.AddHttpClient("APIClient", client =>
 {
@@ -47,6 +49,7 @@ services.AddAuthentication(options =>
     options.ClaimActions.DeleteClaim("sid");
     options.ClaimActions.DeleteClaim("idp");
     options.Scope.Add("roles");
+    options.Scope.Add("imagegalleryapi.fullaccess");
     options.ClaimActions.MapJsonKey("role", "role");
     options.TokenValidationParameters = new()
     {
