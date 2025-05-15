@@ -128,7 +128,8 @@ namespace ImageGallery.Client.Controllers
 
             return RedirectToAction("Index");
         }
-        [Authorize(Roles = "PayingUser")]
+        [Authorize(Policy = "UserCanAddImage")]
+        //[Authorize(Roles = "PayingUser")]
         public IActionResult AddImage()
         {
             return View();

@@ -10,22 +10,29 @@ public static class Config
         {
             new IdentityResource("roles", "Your role(s)", new[] {"role"}),
             new IdentityResources.OpenId(),
-            new IdentityResources.Profile()
+            new IdentityResources.Profile(),
+            new IdentityResource("country",
+                "The country you're living in",
+                new List<string>() {"country"})
         };
     public static IEnumerable<ApiResource> ApiResources =>
         new ApiResource[]
             {
                 new ApiResource("imagegalleryapi", "Image Gallery API",
-                        new [] {"role"})
+                        new [] {"role", "country"})
                 {
-                    Scopes = {"imagegalleryapi.fullaccess" }
+                    Scopes = {"imagegalleryapi.fullaccess",
+                            "imagegalleryapi.read",
+                            "imagegalleryapi.write" }
                 }
             };
 
     public static IEnumerable<ApiScope> ApiScopes =>
         new ApiScope[]
             {
-                new ApiScope("imagegalleryapi.fullaccess")
+                new ApiScope("imagegalleryapi.fullaccess"),
+                new ApiScope("imagegalleryapi.read"),
+                new ApiScope("imagegalleryapi.write")
             };
 
     public static IEnumerable<Client> Clients =>
@@ -49,7 +56,10 @@ public static class Config
                         IdentityServerConstants.StandardScopes.OpenId,
                         IdentityServerConstants.StandardScopes.Profile,
                         "roles",
-                        "imagegalleryapi.fullaccess"
+                        //"imagegalleryapi.fullaccess",
+                        "imagegalleryapi.read",
+                        "imagegalleryapi.write",
+                        "country"
                     },
                     ClientSecrets =
                     {
