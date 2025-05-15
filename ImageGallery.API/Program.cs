@@ -31,16 +31,24 @@ services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 JsonWebTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-       .AddJwtBearer(opt =>
+       //.AddJwtBearer(opt =>
+       //{
+       //    opt.Authority = "https://localhost:5001";
+       //    opt.Audience = "imagegalleryapi";
+       //    opt.TokenValidationParameters = new()
+       //    {
+       //        NameClaimType = "given_name",
+       //        RoleClaimType = "role",
+       //        ValidTypes = new[] { "at+jwt" }
+       //    };
+       //});
+       .AddOAuth2Introspection(opt =>
        {
            opt.Authority = "https://localhost:5001";
-           opt.Audience = "imagegalleryapi";
-           opt.TokenValidationParameters = new()
-           {
-               NameClaimType = "given_name",
-               RoleClaimType = "role",
-               ValidTypes = new[] { "at+jwt" }
-           };
+           opt.ClientId = "imagegalleryapi";
+           opt.ClientSecret = "apisecret";
+           opt.NameClaimType = "given-name";
+           opt.RoleClaimType = "role";
        });
 
 services.AddAuthorization(authorizationOptions =>

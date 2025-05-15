@@ -25,6 +25,11 @@ services.AddHttpClient("APIClient", client =>
     client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
 });
 
+services.AddHttpClient("IDPClient", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:5001");
+});
+
 // Enables to use OpenID connect workflox
 services.AddAuthentication(options =>
 {
@@ -54,6 +59,7 @@ services.AddAuthentication(options =>
     options.Scope.Add("imagegalleryapi.read");
     options.Scope.Add("imagegalleryapi.write");
     options.Scope.Add("country");
+    options.Scope.Add("offline_access");
     options.ClaimActions.MapJsonKey("role", "role");
     options.ClaimActions.MapUniqueJsonKey("country", "country");
     options.TokenValidationParameters = new()
