@@ -25,7 +25,7 @@ public static class Config
                             "imagegalleryapi.read",
                             "imagegalleryapi.write" },
                     ApiSecrets = {new Secret("apisecret".Sha256())}
-                    
+
                 }
             };
 
@@ -39,40 +39,73 @@ public static class Config
 
     public static IEnumerable<Client> Clients =>
         new Client[]
-            {
+        {
+                //new Client()
+                //{
+                //    ClientName = "Image Gallery",
+                //    ClientId = "imagegalleryclient",
+                //    AllowedGrantTypes = GrantTypes.Code,
+                //    AccessTokenType = AccessTokenType.Reference,
+                //    UpdateAccessTokenClaimsOnRefresh = true,
+                //    AccessTokenLifetime = 120,
+                //    //AuthorizationCodeLifetime = 5,
+                //    //IdentityTokenLifetime = 5
+                //    RedirectUris =
+                //    {
+                //        "https://localhost:7184/signin-oidc"
+                //    },
+                //    PostLogoutRedirectUris =
+                //    {
+                //        "https://localhost:7184/signout-callback-oidc"
+                //    },
+                //    AllowedScopes =
+                //    {
+                //        IdentityServerConstants.StandardScopes.OpenId,
+                //        IdentityServerConstants.StandardScopes.Profile,
+                //        "roles",
+                //        //"imagegalleryapi.fullaccess",
+                //        "imagegalleryapi.read",
+                //        "imagegalleryapi.write",
+                //        "country"
+                //    },
+                //    ClientSecrets =
+                //    {
+                //        new Secret("secret".Sha256())
+                //    },
+                //    RequireConsent = true
+                //},
                 new Client()
                 {
-                    ClientName = "Image Gallery",
-                    ClientId = "imagegalleryclient",
+                    ClientName = "Image Gallery BFF",
+                    ClientId = "imagegallerybff",
                     AllowedGrantTypes = GrantTypes.Code,
                     AccessTokenType = AccessTokenType.Reference,
                     UpdateAccessTokenClaimsOnRefresh = true,
-                    AccessTokenLifetime = 120,
-                    //AuthorizationCodeLifetime = 5,
-                    //IdentityTokenLifetime = 5
                     RedirectUris =
                     {
-                        "https://localhost:7184/signin-oidc"
+                        "https://localhost:7119/signin-oidc"
                     },
                     PostLogoutRedirectUris =
                     {
-                        "https://localhost:7184/signout-callback-oidc"
+                        "https://localhost:7119/signout-callback-oidc"
                     },
                     AllowedScopes =
                     {
                         IdentityServerConstants.StandardScopes.OpenId,
                         IdentityServerConstants.StandardScopes.Profile,
                         "roles",
-                        //"imagegalleryapi.fullaccess",
                         "imagegalleryapi.read",
                         "imagegalleryapi.write",
-                        "country"
+                        "country",
+                        "offline_access"
                     },
                     ClientSecrets =
                     {
-                        new Secret("secret".Sha256())
+                        new Secret("anothersecret".Sha256())
                     },
-                    RequireConsent = true
-                }
-            };
+                    RequireConsent = true,
+                    AllowOfflineAccess = true
+                },
+        };
+
 }

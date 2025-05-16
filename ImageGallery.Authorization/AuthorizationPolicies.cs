@@ -10,7 +10,6 @@ namespace ImageGallery.Authorization
                 .RequireAuthenticatedUser()
                 .RequireClaim("country","br")
                 .RequireRole("payingUser")
-                .RequireRole()
                 .Build();
         }
     }
