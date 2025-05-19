@@ -17,6 +17,13 @@ namespace Marvin.IDP.Pages.User.Registration
         public string Password { get; set; }
 
         [Required]
+        [MaxLength(200)]
+        [Display(Name = "Email")]
+        [EmailAddress]
+        public string Email { get; set; }
+
+
+        [Required]
         [MaxLength(250)]
         [Display(Name = "Given Name")]
         public string GivenName { get; set; }

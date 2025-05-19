@@ -1,18 +1,24 @@
 ﻿using Marvin.IDP.DbContexts;
 using Marvin.IDP.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
 
 namespace Marvin.IDP.Services
 {
     public class LocalUserService : ILocalUserService
     {
         private readonly IdentityDbContext _context;
+        private readonly IPasswordHasher<User> _passwordHasher;
 
         public LocalUserService(
-            IdentityDbContext context)
+            IdentityDbContext context,
+            IPasswordHasher<User> passwordHasher)
         {
             _context = context ??
                 throw new ArgumentNullException(nameof(context));
+            _passwordHasher = passwordHasher ??
+                                throw new ArgumentNullException(nameof(passwordHasher));
         }
 
         public async Task<bool> IsUserActive(string subject)
@@ -54,7 +60,10 @@ namespace Marvin.IDP.Services
             }
 
             // Validate credentials
-            return (user.Password == password);
+            //return (user.Password == password);
+
+            var verificationResult = _passwordHasher.VerifyHashedPassword(user, user.Password, password);
+            return (verificationResult == PasswordVerificationResult.Success);
         } 
 
         public async Task<User> GetUserByUserNameAsync(string userName)
@@ -88,7 +97,7 @@ namespace Marvin.IDP.Services
             return await _context.Users.FirstOrDefaultAsync(u => u.Subject == subject);
         }
 
-        public void AddUser(User userToAdd)
+        public void AddUser(User userToAdd, string password)
         {
             if (userToAdd == null)
             {
@@ -102,13 +111,41 @@ namespace Marvin.IDP.Services
                 throw new Exception("Username must be unique");
             }
 
+            if (_context.Users.Any(u => u.Email == userToAdd.Email))
+            {
+                throw new Exception("Email must be unique");
+            }
+
+            userToAdd.SecurityCode = Convert.ToBase64String(RandomNumberGenerator.GetBytes(128));
+            userToAdd.SecurityCodeExpirationDate = DateTime.UtcNow.AddHours(1);
+
+            userToAdd.Password = _passwordHasher.HashPassword(userToAdd, password);
+
             _context.Users.Add(userToAdd);
         }
 
+        public async Task<bool> ActivateUserAsync(string securityCode)
+        {
+            if (string.IsNullOrWhiteSpace(securityCode))
+            {
+                throw new Exception($"{nameof(securityCode)}");
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => 
+            u.SecurityCode == securityCode && 
+            u.SecurityCodeExpirationDate >= DateTime.UtcNow);
+
+            if (user is null) return false;
+
+            user.Active = true;
+            user.SecurityCode = null;
+            return true;
+        }
   
         public async Task<bool> SaveChangesAsync()
         {
             return (await _context.SaveChangesAsync() > 0);
         }
+
     }
 }
