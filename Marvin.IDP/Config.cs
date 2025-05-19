@@ -103,7 +103,7 @@ public static class Config
                     {
                         new Secret("anothersecret".Sha256())
                     },
-                    RequireConsent = true,
+                    //RequireConsent = true,
                     AllowOfflineAccess = true
                 },
         };
