@@ -30,6 +30,12 @@ namespace Marvin.IDP.Services
             IEnumerable<Claim> claims);
 
         Task<bool> ActivateUserAsync(string securityCode);
+        Task AddExternalProviderToUser(
+           string subject,
+           string provider,
+           string providerIdentityKey);
+
+        Task<User> GetUserByEmailAsync(string email);
 
         Task<bool> SaveChangesAsync();
     }
