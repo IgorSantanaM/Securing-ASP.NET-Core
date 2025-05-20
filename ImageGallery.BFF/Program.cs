@@ -16,7 +16,7 @@ builder.Services.AddBff()
 
 builder.Services.AddHttpClient("IDPClient", client =>
 {
-    client.BaseAddress = new Uri("https://localhost:5001/");
+    client.BaseAddress = new Uri("https://localhost:44300/");
 });
 
 JsonWebTokenHandler.DefaultInboundClaimTypeMap.Clear();
@@ -32,7 +32,7 @@ builder.Services.AddAuthentication(options =>
 .AddOpenIdConnect(bffChallengeScheme, options =>
 {
     options.SignInScheme = bffCookieScheme;
-    options.Authority = "https://localhost:5001/";
+    options.Authority = "https://localhost:44300/";
     options.ClientId = "imagegallerybff";
     options.ClientSecret = "anothersecret";
     options.ResponseType = "code";

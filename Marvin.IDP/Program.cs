@@ -19,7 +19,14 @@ try
     var app = builder
         .ConfigureServices()
         .ConfigurePipeline();
-    
+
+    app.Use(async (context, next) =>
+    {
+        context.Response.Headers.Add("Content-Security-Policy",
+            "default-src 'self'; connect-src 'self' http://localhost:52412 ws://localhost:52412 wss://localhost:44384");
+        await next();
+    });
+
     app.Run();
 }
 catch (HostAbortedException )
