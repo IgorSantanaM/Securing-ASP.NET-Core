@@ -24,6 +24,7 @@ namespace Marvin.IDP.Services
         Task<bool> IsUserActive(
             string subject);
 
+
         Task<User> FindUserByExternalProviderAsync(string provider, string providerIdentityKey);
         User AutoProvisioningUser(string provider,
             string providerIdentityKey,
@@ -36,6 +37,12 @@ namespace Marvin.IDP.Services
            string providerIdentityKey);
 
         Task<User> GetUserByEmailAsync(string email);
+
+        Task<UserSecret> GetUserSecretAsync(
+            string subject, string name);
+
+        Task<bool> AddUserSecret(string subject,
+            string name, string secret);
 
         Task<bool> SaveChangesAsync();
     }
