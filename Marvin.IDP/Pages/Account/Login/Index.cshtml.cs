@@ -6,43 +6,45 @@ using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
-using Duende.IdentityServer.Test;
-using Marvin.IDP.Services;
+using Marvin.IDP.Areas.Identity.Data;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using TwoStepsAuthenticator;
 
-namespace Marvin.IDP.Pages.Login;
+namespace IdentityServerHost.Pages.Login;
 
 [SecurityHeaders]
 [AllowAnonymous]
 public class Index : PageModel
 {
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IIdentityServerInteractionService _interaction;
     private readonly IEventService _events;
     private readonly IAuthenticationSchemeProvider _schemeProvider;
     private readonly IIdentityProviderStore _identityProviderStore;
-    private readonly ILocalUserService _localUserService;
 
     public ViewModel View { get; set; } = default!;
-
+        
     [BindProperty]
     public InputModel Input { get; set; } = default!;
-
+        
     public Index(
         IIdentityServerInteractionService interaction,
         IAuthenticationSchemeProvider schemeProvider,
         IIdentityProviderStore identityProviderStore,
         IEventService events,
-        ILocalUserService localUserService)
+        UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signInManager)
     {
+        _userManager = userManager;
+        _signInManager = signInManager;
         _interaction = interaction;
         _schemeProvider = schemeProvider;
         _identityProviderStore = identityProviderStore;
         _events = events;
-        _localUserService = localUserService;
     }
 
     public async Task<IActionResult> OnGet(string? returnUrl)
@@ -95,50 +97,12 @@ public class Index : PageModel
 
         if (ModelState.IsValid)
         {
-            // validate username/password against in-memory store
-            if (await _localUserService.ValidateCredentialsAsync(Input.Username, Input.Password))
+            var result = await _signInManager.PasswordSignInAsync(Input.Username!, Input.Password!, Input.RememberLogin, lockoutOnFailure: true);
+            if (result.Succeeded)
             {
-                var user = await _localUserService.GetUserByUserNameAsync(Input.Username);
-
-                var userSecret = await _localUserService.GetUserSecretAsync(user.Subject, "TOTP");
-
-                if(userSecret == null)
-                {
-                    ModelState.AddModelError("usersecret",
-                        "No second factor secret has been registred - " +
-                        "please contact the helpdesk");
-                    await BuildModelAsync(Input.ReturnUrl);
-                    return Page();
-                }
-
-                var authenticator = new TimeAuthenticator();
-
-                if(!authenticator.CheckCode(userSecret.Secret, Input.Totp, user))
-                {
-                    ModelState.AddModelError("totp", "TOTP is invalid.");
-                    await BuildModelAsync(Input.ReturnUrl);
-                    return Page();
-                }
-
-                await _events.RaiseAsync(new UserLoginSuccessEvent(user.UserName, user.Subject, user.UserName, clientId: context?.Client.ClientId));
+                var user = await _userManager.FindByNameAsync(Input.Username!);
+                await _events.RaiseAsync(new UserLoginSuccessEvent(user!.UserName, user.Id, user.UserName, clientId: context?.Client.ClientId));
                 Telemetry.Metrics.UserLogin(context?.Client.ClientId, IdentityServerConstants.LocalIdentityProvider);
-
-                // only set explicit expiration here if user chooses "remember me". 
-                // otherwise we rely upon expiration configured in cookie middleware.
-                var props = new AuthenticationProperties();
-                if (LoginOptions.AllowRememberLogin && Input.RememberLogin)
-                {
-                    props.IsPersistent = true;
-                    props.ExpiresUtc = DateTimeOffset.UtcNow.Add(LoginOptions.RememberMeLoginDuration);
-                };
-
-                // issue authentication cookie with subject ID and username
-                var isuser = new IdentityServerUser(user.Subject)
-                {
-                    DisplayName = user.UserName
-                };
-
-                await HttpContext.SignInAsync(isuser, props);
 
                 if (context != null)
                 {

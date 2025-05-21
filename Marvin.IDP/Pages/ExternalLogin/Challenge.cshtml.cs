@@ -1,4 +1,4 @@
- // Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 using Duende.IdentityServer.Services;
@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Marvin.IDP.Pages.ExternalLogin;
+namespace IdentityServerHost.Pages.ExternalLogin;
 
 [AllowAnonymous]
 [SecurityHeaders]
@@ -36,7 +36,7 @@ public class Challenge : PageModel
         {
             RedirectUri = Url.Page("/externallogin/callback"),
                 
-            Items = 
+            Items =
             {
                 { "returnUrl", returnUrl }, 
                 { "scheme", scheme },

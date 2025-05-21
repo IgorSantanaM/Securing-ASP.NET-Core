@@ -7,7 +7,6 @@ namespace Marvin.IDP.DbContexts
     public class IdentityDbContext : DbContext
     {
         public DbSet<User> Users { get; set; }
-
         public DbSet<UserClaim> UserClaims { get; set; }         
         public DbSet<UserLogin> UserLogins { get; set; }         
         public DbSet<UserSecret> UserSecrets{ get; set; }         
