@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using TwoStepsAuthenticator;
 
 namespace Marvin.IDP.Pages.Login;
 
@@ -98,6 +99,27 @@ public class Index : PageModel
             if (await _localUserService.ValidateCredentialsAsync(Input.Username, Input.Password))
             {
                 var user = await _localUserService.GetUserByUserNameAsync(Input.Username);
+
+                var userSecret = await _localUserService.GetUserSecretAsync(user.Subject, "TOTP");
+
+                if(userSecret == null)
+                {
+                    ModelState.AddModelError("usersecret",
+                        "No second factor secret has been registred - " +
+                        "please contact the helpdesk");
+                    await BuildModelAsync(Input.ReturnUrl);
+                    return Page();
+                }
+
+                var authenticator = new TimeAuthenticator();
+
+                if(!authenticator.CheckCode(userSecret.Secret, Input.Totp, user))
+                {
+                    ModelState.AddModelError("totp", "TOTP is invalid.");
+                    await BuildModelAsync(Input.ReturnUrl);
+                    return Page();
+                }
+
                 await _events.RaiseAsync(new UserLoginSuccessEvent(user.UserName, user.Subject, user.UserName, clientId: context?.Client.ClientId));
                 Telemetry.Metrics.UserLogin(context?.Client.ClientId, IdentityServerConstants.LocalIdentityProvider);
 

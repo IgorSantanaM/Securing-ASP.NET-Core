@@ -1,3 +1,4 @@
+using IdentityModel.Client;
 using ImageGallery.API.Authorization;
 using ImageGallery.API.DbContexts;
 using ImageGallery.API.Services;
