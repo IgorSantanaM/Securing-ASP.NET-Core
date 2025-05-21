@@ -1,4 +1,6 @@
 using Duende.IdentityServer;
+using Marvin.IDP.Areas.Identity.Data;
+using Marvin.IDP.Data;
 using Marvin.IDP.DbContexts;
 using Marvin.IDP.Entities;
 using Marvin.IDP.Services;
@@ -26,7 +28,14 @@ internal static class HostingExtensions
 
         // uncomment if you want to add a UI
         builder.Services.AddRazorPages();
-        
+
+        var connectionString = builder.Configuration.GetConnectionString("MarvinIDPContextConnection") ?? throw new InvalidOperationException("Connection string 'MarvinIDPContextConnection' not found.");
+
+        builder.Services.AddDbContext<MarvinIDPContext>(options => options.UseSqlite(connectionString));
+
+        builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            .AddEntityFrameworkStores<MarvinIDPContext>();
+
         builder.Services.AddScoped<ILocalUserService, LocalUserService>();
         builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
@@ -46,7 +55,8 @@ internal static class HostingExtensions
             .AddInMemoryIdentityResources(Config.IdentityResources)
             .AddInMemoryApiScopes(Config.ApiScopes)
             .AddInMemoryApiResources(Config.ApiResources)
-            .AddInMemoryClients(Config.Clients);
+            .AddInMemoryClients(Config.Clients)
+            .AddAspNetIdentity<ApplicationUser>();
 
         builder.Services
             .AddAuthentication()
